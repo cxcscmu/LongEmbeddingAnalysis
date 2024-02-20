@@ -39,5 +39,8 @@ fi
 
 pip install .
 
+pip install flash-attn==2.4.2 --no-build-isolation
+
 echo "Installation completed successfully."
 cd ..
+
