@@ -1,16 +1,12 @@
 #!/bin/bash
-
-#SBATCH --job-name=openmatch_eval_dense_retriever_msmarco
-
+#SBATCH --job-name=eval_dr_openmatch
 #SBATCH --output=logs/%x-%j.out
 #SBATCH -e logs/%x-%j.err
-#SBATCH -n 1 # Number of tasks
-#SBATCH --cpus-per-task 12 # number cpus (threads) per task
-
-#SBATCH --mem=200000 # Memory 
-#SBATCH --time=0 # No time limit
-
-#SBATCH --gres=gpu:nvidia_a100-pcie-40gb:4
+#SBATCH --partition=general
+#SBATCH --gres=gpu:A6000:2
+#SBATCH --cpus-per-task=4
+#SBATCH --mem=200G
+#SBATCH --time=2-00:00:00
 
 eval "$(conda shell.bash hook)"
 conda activate openmatch
@@ -19,7 +15,7 @@ model_to_eval=$1
 model_name=$(basename "$model_to_eval")
 
 text_length=2048
-n_gpus=4
+n_gpus=2
 
 embeddings_out="./data/embeddings/dev/$model_name"
 run_save="./results/$model_name"
@@ -31,9 +27,8 @@ corpus=./data/marco_documents_processed/corpus_firstp_$text_length.tsv
 mkdir -p $run_save
 mkdir -p $embeddings_out
 
-# slurm/conda have a wierd connection to accelerate - sometimes need to specify the whole path to the binary, otherwise it will use another version
 
-~/.conda/envs/openmatch/bin/accelerate launch --num_processes $n_gpus --multi_gpu OpenMatch/src/openmatch/driver/build_index.py  \
+accelerate launch --num_processes $n_gpus --multi_gpu --main_process_port 29777 OpenMatch/src/openmatch/driver/build_index.py  \
     --output_dir $embeddings_out \
     --model_name_or_path $model_to_eval \
     --per_device_eval_batch_size 430  \
@@ -42,9 +37,10 @@ mkdir -p $embeddings_out
     --doc_column_names id,title,text  \
     --p_max_len $text_length  \
     --fp16  \
-    --dataloader_num_workers 1
+    --dataloader_num_workers 1 \
+    --rope True
 
-~/.conda/envs/openmatch/bin/accelerate launch --num_processes $n_gpus --multi_gpu OpenMatch/src/openmatch/driver/retrieve.py  \
+accelerate launch --num_processes $n_gpus --multi_gpu --main_process_port 29777 OpenMatch/src/openmatch/driver/retrieve.py  \
     --output_dir $embeddings_out  \
     --model_name_or_path $model_to_eval \
     --per_device_eval_batch_size 600  \
@@ -56,6 +52,7 @@ mkdir -p $embeddings_out
     --trec_save_path $run_save/dev.trec \
     --dataloader_num_workers 1 \
     --use_gpu \
-    --retrieve_depth 100
+    --retrieve_depth 100 \
+    --rope True
 
 python OpenMatch/scripts/evaluate.py $dev_qrels $run_save/dev.trec > $run_save/dev.results

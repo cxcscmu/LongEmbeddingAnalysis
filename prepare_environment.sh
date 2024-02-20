@@ -37,6 +37,13 @@ else
     exit 1
 fi
 
+if [ -d "OpenMatch" ]; then
+    cd OpenMatch || { echo "Failed to change directory."; exit 1; }
+else
+    echo "Directory 'OpenMatch' not found."
+    exit 1
+fi
+
 pip install .
 
 pip install flash-attn==2.4.2 --no-build-isolation

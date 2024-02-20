@@ -1,3 +1,5 @@
 data/embeddings/*
 data/marco_documents/*
 data/marco_documents_processed/*
+logs/*.out
+logs/*.err
