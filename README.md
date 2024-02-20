@@ -48,8 +48,8 @@ This will create the results folder, with the trec-formatted run and trec-eval o
 
 ## Model training
 
-```bash
-./scripts/eval_dr.sh jmvcoelho/t5-base-marco-2048
-```
+TODO
 
-This will create the results folder, with the trec-formatted run and trec-eval output for the model.
+## Other experiments
+
+TODO
