@@ -269,7 +269,7 @@ class DRModel(nn.Module):
                                 importlib.import_module(".rope_t5", package=__package__), model_name)
 
                 #model_class = T5EncoderModelRoPE
-                #print(f"USING {model_class} check if its what u want")
+                print(f"USING {model_class} check if its what u want")
                 lm_q = lm_p = model_class.from_pretrained(
                     model_name_or_path,
                     **hf_kwargs

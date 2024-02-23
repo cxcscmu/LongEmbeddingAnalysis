@@ -1,5 +1,5 @@
 # Given the data from here: https://github.com/thunlp/OpenMatch/blob/fbf198ad5353e35b8b67ea7539783db61b32d1f2/v1/docs/experiments-msmarco-doc.md
-# build files files in normalized format
+# build files files in normalized format to be used as input for OpenMatch
 
 import re
 import pickle

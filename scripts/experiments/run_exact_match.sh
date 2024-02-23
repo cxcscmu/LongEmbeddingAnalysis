@@ -1,48 +1,63 @@
 #!/bin/bash
-
-#SBATCH --job-name=a_exact_match_encode
-
-# The line below writes to a logs dir inside the one where sbatch was called
-# %x will be replaced by the job name, and %j by the job id
-
+#SBATCH --job-name=exact_match
 #SBATCH --output=logs/%x-%j.out
 #SBATCH -e logs/%x-%j.err
-#SBATCH -n 1 # Number of tasks
-#SBATCH --cpus-per-task 12 # number cpus (threads) per task
-
-# 327680
-#SBATCH --mem=200000 # Memory - Use up to 2GB per requested CPU as a rule of thumb
-#SBATCH --time=0 # No time limit
-
-# You can also change the number of requested GPUs
-# replace the XXX with nvidia_a100-pcie-40gb or nvidia_a100-sxm4-40gb
-# replace the YYY with the number of GPUs that you need, 1 to 8 PCIe or 1 to 4 SXM4
-
-#SBATCH --gres=gpu:nvidia_a100-sxm4-40gb:1
+#SBATCH --partition=general
+#SBATCH --cpus-per-task=4
+#SBATCH --mem=200G
+#SBATCH --gres=gpu:A6000:1
+#SBATCH --time=2-00:00:00
 
 eval "$(conda shell.bash hook)"
 conda activate openmatch
 
-model_to_eval=/user/home/jcoelho/clueweb-structured-retrieval/models/marco/t5-base-marco-2048-v3-scaled-dr-pretrain-v2-meanpool
+model_to_eval=$1
+model_name=$(basename "$model_to_eval")
 
-split=documents
+echo "Evaluating model $model_name on exact match task"
 
+outpath=./data/exact_match_experiment/corpus/
+
+mkdir -p $outpath
+
+# tail -30000 ./data/marco_documents_processed/corpus_firstp_2048.tsv > $outpath/full.tsv
+
+# python ./data/process_corpus_exact_match.py $outpath $model_to_eval
 
 text_length=2048
 n_gpus=1
 
-
-for i in {0..10}; do
-    mkdir /user/home/jcoelho/clueweb-structured-retrieval/marco/documents/small_eval_set/exact_match/embeddings/10-evaluation-dots/mean-pool/$i
+for i in {0..9}; do
+    embeddings_path=./data/exact_match_experiment/embeddings/$model_name/$i
+    mkdir -p $embeddings_path
     
-    /home/jcoelho/.conda/envs/openmatch/bin/accelerate launch --num_processes $n_gpus OpenMatch/src/openmatch/driver/build_index.py  \
-        --output_dir /user/home/jcoelho/clueweb-structured-retrieval/marco/documents/small_eval_set/exact_match/embeddings/10-evaluation-dots/mean-pool/$i \
+    accelerate launch --num_processes $n_gpus OpenMatch/src/openmatch/driver/build_index.py  \
+        --output_dir $embeddings_path \
         --model_name_or_path $model_to_eval \
         --per_device_eval_batch_size 450  \
-        --corpus_path /user/home/jcoelho/clueweb-structured-retrieval/marco/documents/small_eval_set/exact_match/10-evaluation-dots/$i.tsv \
+        --corpus_path $outpath/$i.tsv \
         --doc_template "Title: <title> Text: <text>"  \
         --doc_column_names id,title,text  \
         --p_max_len $text_length  \
         --fp16  \
-        --dataloader_num_workers 1
+        --dataloader_num_workers 1 \
+        --rope True
 done
+
+embeddings_path=./data/exact_match_experiment/embeddings/$model_name/full
+mkdir $embeddings_path
+accelerate launch --num_processes $n_gpus OpenMatch/src/openmatch/driver/build_index.py  \
+    --output_dir $embeddings_path \
+    --model_name_or_path $model_to_eval \
+    --per_device_eval_batch_size 450  \
+    --corpus_path $outpath/full.tsv \
+    --doc_template "Title: <title> Text: <text>"  \
+    --doc_column_names id,title,text  \
+    --p_max_len $text_length  \
+    --fp16  \
+    --dataloader_num_workers 1 \
+    --rope True
+
+mkdir -p ./data/exact_match_experiment/plots/$model_name
+
+python ./data/exact_match_experiment/plot_exact_match_violin.py ./data/exact_match_experiment/embeddings/$model_name ./data/exact_match_experiment/plots/$model_name

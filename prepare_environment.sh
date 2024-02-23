@@ -48,6 +48,10 @@ pip install .
 
 pip install flash-attn==2.4.2 --no-build-isolation
 
+pip install matplotlib
+
+pip install seaborn
+
 echo "Installation completed successfully."
 cd ..
 

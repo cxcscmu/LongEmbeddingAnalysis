@@ -49,7 +49,17 @@ This will create the results folder, with the trec-formatted run and trec-eval o
 ## Model training
 
 ```bash
-./scripts/eval_dr.sh jmvcoelho/t5-base-marco-2048
+wandb login #if you haven't already
+
+./scripts/train_dr.sh jmvcoelho/t5-base-marco-crop-pretrain-2048
 ```
 
-This will create the results folder, with the trec-formatted run and trec-eval output for the model.
+This will:
+- pretokenize the data
+- do 1 episode on ance negatives, then 3 more episodes with negative refeshing
+- evaluate the final model
+- hard negatives also computed for final model in case you wish to pickup training
+
+Training starts of crop pretrained model. 
+
+You may want to set $DATA_PATH on the script, as this writes to the current directory.
