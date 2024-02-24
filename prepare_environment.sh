@@ -37,6 +37,10 @@ else
     exit 1
 fi
 
+pip install .
+
+cd ..
+
 if [ -d "OpenMatch" ]; then
     cd OpenMatch || { echo "Failed to change directory."; exit 1; }
 else
