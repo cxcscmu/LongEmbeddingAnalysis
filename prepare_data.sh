@@ -29,3 +29,6 @@ rm "$downloads_directory"/*.zip
 
 python ./data/process_marco_doc.py 2048 $downloads_directory $processed_data_directory
 
+# https://msmarco.z22.web.core.windows.net/msmarcoranking/queries.tar.gz
+# https://msmarco.z22.web.core.windows.net/msmarcoranking/collection.tar.gz
+# https://msmarco.z22.web.core.windows.net/msmarcoranking/qrels.dev.tsv

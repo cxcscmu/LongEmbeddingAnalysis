@@ -18,7 +18,7 @@ def is_valid_id(did):
 
 ID_MAPPER_DOCS = {}
 
-corpus_only = False
+corpus_only = True
 
 # this script prepares marco data to be compatible with openmatch
 

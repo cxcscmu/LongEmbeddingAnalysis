@@ -324,9 +324,9 @@ class DRModel(nn.Module):
             tied = not model_args.untie_encoder
 
             if model_args.encoder_only:
-                model_class = T5EncoderModel
-                #model_class = T5EncoderModelRoPE
-                #print(f"USING {model_class} check if its what u want")
+                #model_class = T5EncoderModel
+                model_class = T5EncoderModelRoPE
+                print(f"USING {model_class} check if its what u want")
             elif model_args.fusion:
                 model_class = T5ModelWithFusion
                 print("Loading FiD T5")

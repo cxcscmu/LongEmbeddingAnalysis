@@ -4,8 +4,8 @@
 #SBATCH -e logs/%x-%j.err
 #SBATCH --partition=general
 #SBATCH --cpus-per-task=4
-#SBATCH --mem=200G
-#SBATCH --gres=gpu:A6000:1
+#SBATCH --mem=100G
+#SBATCH --gres=gpu:A100_80GB:1
 #SBATCH --time=2-00:00:00
 
 eval "$(conda shell.bash hook)"
@@ -26,6 +26,10 @@ mkdir -p $outpath
 
 text_length=2048
 n_gpus=1
+ 
+#jmvcoelho/t5-base-marco-2048  |  avg pool
+#jmvcoelho/t5-base-marco-crop-pretrain-2048  |  dec pool
+#jmvcoelho/t5-base-marco-crop-pretrain-2048-avg-pool   | avg pool
 
 for i in {0..9}; do
     embeddings_path=./data/exact_match_experiment/embeddings/$model_name/$i
@@ -34,14 +38,16 @@ for i in {0..9}; do
     accelerate launch --num_processes $n_gpus OpenMatch/src/openmatch/driver/build_index.py  \
         --output_dir $embeddings_path \
         --model_name_or_path $model_to_eval \
-        --per_device_eval_batch_size 450  \
+        --per_device_eval_batch_size 900  \
         --corpus_path $outpath/$i.tsv \
         --doc_template "Title: <title> Text: <text>"  \
         --doc_column_names id,title,text  \
         --p_max_len $text_length  \
         --fp16  \
         --dataloader_num_workers 1 \
-        --rope True
+        --rope True \
+        --encoder_only True \
+        --pooling mean 
 done
 
 embeddings_path=./data/exact_match_experiment/embeddings/$model_name/full
@@ -49,14 +55,16 @@ mkdir $embeddings_path
 accelerate launch --num_processes $n_gpus OpenMatch/src/openmatch/driver/build_index.py  \
     --output_dir $embeddings_path \
     --model_name_or_path $model_to_eval \
-    --per_device_eval_batch_size 450  \
+    --per_device_eval_batch_size 900  \
     --corpus_path $outpath/full.tsv \
     --doc_template "Title: <title> Text: <text>"  \
     --doc_column_names id,title,text  \
     --p_max_len $text_length  \
     --fp16  \
     --dataloader_num_workers 1 \
-    --rope True
+    --rope True \
+    --encoder_only True \
+    --pooling mean 
 
 mkdir -p ./data/exact_match_experiment/plots/$model_name
 
