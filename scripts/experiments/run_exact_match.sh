@@ -27,7 +27,7 @@ mkdir -p $outpath
 text_length=2048
 n_gpus=1
  
-#jmvcoelho/t5-base-marco-2048  |  avg pool
+# HF Models:
 #jmvcoelho/t5-base-marco-crop-pretrain-2048  |  dec pool
 #jmvcoelho/t5-base-marco-crop-pretrain-2048-avg-pool   | avg pool
 

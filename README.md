@@ -1,3 +1,8 @@
+# Dwell in the Beginning: How Language Models Embed Documents for Retrieval
+
+This repository contains code to reproduce the models and experiments associated with the paper 
+[Dwell in the Beginning: How Language Models Embed Documents for Retrieval](https://arxiv.org/abs/2404.04163)
+
 
 ## Installation
 

@@ -14,15 +14,17 @@ conda activate openmatch
 model_to_eval=$1
 model_name=$(basename "$model_to_eval")
 
+DATA_PATH="."
+
 text_length=2048
 n_gpus=2
 
-embeddings_out="./data/embeddings/dev/$model_name"
-run_save="./results/$model_name"
+embeddings_out="$DATA_PATH/data/embeddings/dev/$model_name"
+run_save="$DATA_PATH/results/$model_name"
 
-dev_queries=./data/marco_documents_processed/dev.query.txt
-dev_qrels=./data/marco_documents_processed/qrels.dev.tsv
-corpus=./data/marco_documents_processed/corpus_firstp_$text_length.tsv
+dev_queries=$DATA_PATH/data/marco_documents_processed/dev.query.txt
+dev_qrels=$DATA_PATH/data/marco_documents_processed/qrels.dev.tsv
+corpus=$DATA_PATH/data/marco_documents_processed/corpus_firstp_$text_length.tsv
 
 mkdir -p $run_save
 mkdir -p $embeddings_out

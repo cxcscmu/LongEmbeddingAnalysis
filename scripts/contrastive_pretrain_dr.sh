@@ -23,13 +23,13 @@ split=documents
 text_length=2048
 n_gpus=4
 
-initial_model=./models/t5-base-marco-2048-v3-scaled #-marco-pretrain
+initial_model=$1
 
-first_trained_model_name=t5-base-marco-2048-v3-scaled-dr-pretrain-v3-lq
+first_trained_model_name=$2
 
-corpus=./marco/$split/corpus_firstp_2048.tsv
+corpus=$DATA_PATH/data/marco_documents_processed/corpus_firstp_$text_length.tsv
 
-initial_data_save_folder=./marco/$split/pretrain_data/smaller/
+initial_data_save_folder=$DATA_PATH/marco/$split/pretrain_data/smaller/
 mkdir -p $initial_data_save_folder
 
 python OpenMatch/scripts/msmarco/build_pretrain.py \
@@ -55,7 +55,7 @@ rm $initial_data_save_folder/full.jsonl
 first_model_output_path=./models/marco/$first_trained_model_name
 train_data=$initial_data_save_folder/train.jsonl
 
-/home/jcoelho/.conda/envs/openmatch/bin/accelerate launch --num_processes $n_gpus --multi_gpu OpenMatch/src/openmatch/driver/pretrain_dr.py  \
+accelerate launch --num_processes $n_gpus --multi_gpu OpenMatch/src/openmatch/driver/pretrain_dr.py  \
     --output_dir $first_model_output_path \
     --model_name_or_path $initial_model \
     --do_train \

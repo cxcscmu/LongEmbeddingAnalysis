@@ -13,10 +13,6 @@
 #SBATCH --mem=32000 # Memory - Use up to 2GB per requested CPU as a rule of thumb
 #SBATCH --time=0 # No time limit
 
-# You can also change the number of requested GPUs
-# replace the XXX with nvidia_a100-pcie-40gb or nvidia_a100-sxm4-40gb
-# replace the YYY with the number of GPUs that you need, 1 to 8 PCIe or 1 to 4 SXM4
-
 #SBATCH --gres=gpu:nvidia_a100-sxm4-40gb:1
 
 eval "$(conda shell.bash hook)"
@@ -27,9 +23,7 @@ text_length=2048
 n_gpus=1
 
 # this assumes that this model already has a full corpus index.
-model_name=t5-base-documents-firstp-marco-pretrain-v3-dr-pt-2e-2048
-#model_name=t5-base-documents-firstp-marco-pretrain-v3-dr-pt-2e-2048-self-hn-1-self-hn-2-self-hn-3
-#model_name=t5-base-marco-2048-v3-scaled-dr-pretrain-v2
+model_name=jmvcoelho/t5-base-marco-2048
 
 model_to_eval=/user/home/jcoelho/clueweb-structured-retrieval/models/marco/$model_name
 
