@@ -28,7 +28,15 @@ done
 rm "$downloads_directory"/*.zip
 
 python ./data/process_marco_doc.py 2048 $downloads_directory $processed_data_directory
+python ./data/process_marco_doc.py full $downloads_directory $processed_data_directory
 
-# https://msmarco.z22.web.core.windows.net/msmarcoranking/queries.tar.gz
-# https://msmarco.z22.web.core.windows.net/msmarcoranking/collection.tar.gz
-# https://msmarco.z22.web.core.windows.net/msmarcoranking/qrels.dev.tsv
+downloads_directory="./data/marco_passage"
+
+mkdir -p $downloads_directory
+
+wget -P $downloads_directory --no-check-certificate https://rocketqa.bj.bcebos.com/corpus/marco.tar.gz
+tar -zxf $downloads_directory/marco.tar.gz -C $downloads_directory
+rm -rf $downloads_directory/marco.tar.gz
+mv $downloads_directory/marco/* $downloads_directory
+rm -r $downloads_directory/marco
+join  -t "$(echo -en '\t')"  -e '' -a 1  -o 1.1 2.2 1.2  <(sort -k1,1 $downloads_directory/para.txt) <(sort -k1,1 $downloads_directory/para.title.txt) | sort -k1,1 -n > $downloads_directory/corpus.tsv

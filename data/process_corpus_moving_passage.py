@@ -1,21 +1,22 @@
 from transformers import AutoTokenizer
 from tqdm import tqdm 
 
-doc_corpus = "/user/home/jcoelho/clueweb-structured-retrieval/marco/documents/corpus.tsv"
-dev_doc_qrels_path = "/user/home/jcoelho/clueweb-structured-retrieval/marco/documents/qrels.dev.tsv"
-dev_docs_q_path = "/user/home/jcoelho/clueweb-structured-retrieval/marco/documents/dev.query.txt"
+doc_corpus = "./data/marco_documents_processed/corpus_firstp_full.tsv"
+dev_doc_qrels_path = "./data/marco_documents_processed/qrels.dev.tsv"
+dev_docs_q_path = "./data/marco_documents_processed/dev.query.txt"
 
-pass_corpus = "/user/home/jcoelho/clueweb-structured-retrieval/marco/passage/corpus.tsv"
-dev_pass_qrels_path = "/user/home/jcoelho/clueweb-structured-retrieval/marco/passage/qrels.dev.tsv"
-dev_pass_q_path = "/user/home/jcoelho/clueweb-structured-retrieval/marco/passage/dev.query.txt"
+pass_corpus = "./data/marco_passage/corpus.tsv"
+dev_pass_qrels_path = "./data/marco_passage/qrels.dev.tsv"
+dev_pass_q_path = "./data/marco_passage/dev.query.txt"
 
-tokenizer = AutoTokenizer.from_pretrained("/user/home/jcoelho/clueweb-structured-retrieval/models/t5-base-marco-2048-v3+dr-pretrain-scaled")
+MAX_SEQ_LEN = 2048
+
+tokenizer = AutoTokenizer.from_pretrained("jmvcoelho/t5-base-marco-2048") # experiments are model-specific, will need to change this
 
 def create_strings_10(passage, doc):
     # String C
-    
-    if len(tokenizer.encode(doc)) <= 2048:
-        assert passage in doc
+    assert passage in doc # make sure we can exact match the passage in the document!
+    if len(tokenizer.encode(doc)) <= MAX_SEQ_LEN:
 
         without_passage = doc.replace(passage, '', 1)
 
@@ -46,10 +47,10 @@ def create_strings_10(passage, doc):
         doc_tok = tokenizer.encode(without_passage)
         passage_tok = tokenizer.encode(passage)
 
-        doc_tok = doc_tok[:2048]
+        doc_tok = doc_tok[:MAX_SEQ_LEN]
         doc_tok = doc_tok[:-len(passage_tok)]
 
-        assert len(doc_tok) + len(passage_tok) <= 2048
+        assert len(doc_tok) + len(passage_tok) <= MAX_SEQ_LEN
 
         documents = []
 
@@ -73,7 +74,6 @@ def create_strings_10(passage, doc):
         return documents
 
 
-
 corpus = {}
 with open(pass_corpus, 'r') as h:
     for line in h:
@@ -83,7 +83,7 @@ with open(pass_corpus, 'r') as h:
 pass_qrel = {}
 with open(dev_pass_qrels_path, 'r') as h:
     for line in h:
-        qid,_,pid,_ = line.strip().split("\t")
+        qid, pid = line.strip().split("\t")
         pass_qrel[qid] = pid
 
 
@@ -131,35 +131,23 @@ with open(doc_corpus, 'r') as h:
         if did in did2passage:
             d_corpus[did] = text.strip()
 
-assert d_corpus == did2passage
-
 did2qid = {}
 
-with open("/user/home/jcoelho/clueweb-structured-retrieval/marco/documents/small_eval_set/qrels.dev.tsv.small.v3") as h:
+with open("./data/qrels.dev.tsv.moving.passage") as h:
     for line in h:
         qid, _, did, _ = line.strip().split("\t")
         did2qid[did] = qid
-    
-
-with open("/user/home/jcoelho/clueweb-structured-retrieval/marco/documents/small_eval_set/positive_passage_index_v3.tsv", 'w') as h:
-    for k in did2passage:
-        if did2passage[k] in d_corpus[k]:
-            h.write(f"{did2qid[k]}\t{d_corpus[k].index(did2passage[k])}\n") 
-
-    
-
-doc_corpus = "/user/home/jcoelho/clueweb-structured-retrieval/marco/documents/corpus.tsv"
-
-corpus_0 = "/user/home/jcoelho/clueweb-structured-retrieval/marco/documents/small_eval_set/10-evaluation-dots/corpus_0.tsv"
-corpus_1 = "/user/home/jcoelho/clueweb-structured-retrieval/marco/documents/small_eval_set/10-evaluation-dots/corpus_1.tsv"
-corpus_2 = "/user/home/jcoelho/clueweb-structured-retrieval/marco/documents/small_eval_set/10-evaluation-dots/corpus_2.tsv"
-corpus_3 = "/user/home/jcoelho/clueweb-structured-retrieval/marco/documents/small_eval_set/10-evaluation-dots/corpus_3.tsv"
-corpus_4 = "/user/home/jcoelho/clueweb-structured-retrieval/marco/documents/small_eval_set/10-evaluation-dots/corpus_4.tsv"
-corpus_5 = "/user/home/jcoelho/clueweb-structured-retrieval/marco/documents/small_eval_set/10-evaluation-dots/corpus_5.tsv"
-corpus_6 = "/user/home/jcoelho/clueweb-structured-retrieval/marco/documents/small_eval_set/10-evaluation-dots/corpus_6.tsv"
-corpus_7 = "/user/home/jcoelho/clueweb-structured-retrieval/marco/documents/small_eval_set/10-evaluation-dots/corpus_7.tsv"
-corpus_8 = "/user/home/jcoelho/clueweb-structured-retrieval/marco/documents/small_eval_set/10-evaluation-dots/corpus_8.tsv"
-corpus_9 = "/user/home/jcoelho/clueweb-structured-retrieval/marco/documents/small_eval_set/10-evaluation-dots/corpus_9.tsv"
+        
+corpus_0 = "./data/moving_passage_experiment/corpus_0.tsv"
+corpus_1 = "./data/moving_passage_experiment/corpus_1.tsv"
+corpus_2 = "./data/moving_passage_experiment/corpus_2.tsv"
+corpus_3 = "./data/moving_passage_experiment/corpus_3.tsv"
+corpus_4 = "./data/moving_passage_experiment/corpus_4.tsv"
+corpus_5 = "./data/moving_passage_experiment/corpus_5.tsv"
+corpus_6 = "./data/moving_passage_experiment/corpus_6.tsv"
+corpus_7 = "./data/moving_passage_experiment/corpus_7.tsv"
+corpus_8 = "./data/moving_passage_experiment/corpus_8.tsv"
+corpus_9 = "./data/moving_passage_experiment/corpus_9.tsv"
 
 did2passage_small = {}
 for k in did2passage:
@@ -183,11 +171,8 @@ with open(doc_corpus, 'r') as h, \
     for line in tqdm(h):
         did, title, text = line.strip().split("\t")
     
-        if did not in dids:
-            for i in range(len(outs)):
-                outs[i].write(f"{did}\t{title}\t{text}\n")
-
-        else:
+        if did in did2qid:
+            
             docs = create_strings_10(did2passage_small[did].lower(), text.lower())
 
             for i in range(len(docs)):

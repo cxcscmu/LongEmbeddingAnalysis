@@ -1,6 +1,8 @@
 data/embeddings/*
 data/marco_documents/*
 data/marco_documents_processed/*
+data/moving_passage_experiment/*
+data/marco_passage/*
 data/training_data/*
 data/exact_match_experiment/corpus/*
 data/exact_match_experiment/embeddings/*

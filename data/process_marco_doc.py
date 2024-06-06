@@ -5,12 +5,10 @@ import re
 import pickle
 import sys
 
-MAX_DOC_LEN = int(sys.argv[1])
+MAX_DOC_LEN = int(sys.argv[1]) if sys.argv[1] != "full" else sys.argv[1]
 data_target_in = sys.argv[2]
 data_target_path = sys.argv[3]
 
-
-#MAX_DOC_LEN = 2048
 
 def is_valid_id(did):
     pattern = re.compile(r'^D\d+$')
@@ -18,7 +16,7 @@ def is_valid_id(did):
 
 ID_MAPPER_DOCS = {}
 
-corpus_only = True
+corpus_only = False
 
 # this script prepares marco data to be compatible with openmatch
 
@@ -48,7 +46,13 @@ with open(f"{data_target_in}/msmarco-docs.tsv", "r") as f, \
         ID_MAPPER_DOCS[did] = str(start_id)
 
         text = text.replace("\"", "").replace("\'", "").replace("\n", "").replace("\t", "").replace("\r", "")
-        text = " ".join(text.split(" ")[:MAX_DOC_LEN])
+
+        if MAX_DOC_LEN != "full":
+            threshold = MAX_DOC_LEN
+        else:
+            threshold = len(text.split(" "))
+        text = " ".join(text.split(" ")[:threshold])
+
         fout.write(f"{ID_MAPPER_DOCS[did]}\t{title}\t{text}\n")
         start_id += 1
 
